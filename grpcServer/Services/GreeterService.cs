@@ -3,7 +3,7 @@ using grpcServer;
 
 namespace grpcServer.Services
 {
-    public class GreeterService : Greeter.GreeterBase
+    public class GreeterService : Greeter.GreeterClient
     {
         private readonly ILogger<GreeterService> _logger;
         public GreeterService(ILogger<GreeterService> logger)

@@ -27,22 +27,48 @@ var messageClient = new Message.MessageClient(channel);
 //    System.Console.WriteLine(response.ResponseStream.Current.Message);
 //}
 
-//Client Streaming
+////Client Streaming
+//var request = messageClient.SendMessage();
+//for (int i = 0; i < 10; i++)
+//{
+//    await Task.Delay(100);
+//    await request.RequestStream.WriteAsync(new MessageRequest
+//    {
+//        Name = "Samed",
+//        Message = "Merhabalar " + i
+//    });
+//}
+
+////Stream datanın sonlandığını ifade eder.
+//await request.RequestStream.CompleteAsync();
+
+//Console.WriteLine((await request.ResponseAsync).Message);
+
+//Bi - Directional Streaming
 var request = messageClient.SendMessage();
-for (int i = 0; i < 10; i++)
+var task1 = Task.Run(async () =>
 {
-    await Task.Delay(100);
-    await request.RequestStream.WriteAsync(new MessageRequest
+    for (int i = 0; i < 10; i++)
     {
-        Name = "Samed",
-        Message = "Merhabalar " + i
-    });
+        await Task.Delay(1000);
+
+        await request.RequestStream.WriteAsync(new MessageRequest
+        {
+            Name = "Samed",
+            Message = "Merhaba" + i
+        });
+    }
+
+    await request.RequestStream.CompleteAsync();
+});
+
+CancellationTokenSource cancellationTokenSource = new();
+while (await request.ResponseStream.MoveNext(cancellationTokenSource.Token))
+{
+    System.Console.WriteLine(request.ResponseStream.Current.Message);
 }
 
-//Stream datanın sonlandığını ifade eder.
-await request.RequestStream.CompleteAsync();
-
-Console.WriteLine((await request.ResponseAsync).Message);
+await task1;
 
 
 //var greeterClient = new Greeter.GreeterClient(channel);

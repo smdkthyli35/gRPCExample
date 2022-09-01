@@ -5,13 +5,29 @@ using grpcMessageClient;
 var channel = GrpcChannel.ForAddress("https://localhost:7133");
 var messageClient = new Message.MessageClient(channel);
 
-MessageResponse response = await messageClient.SendMessageAsync(new MessageRequest
+//Unary
+//MessageResponse response = await messageClient.SendMessageAsync(new MessageRequest
+//{
+//    Message = "Merhaba",
+//    Name = "Samed"
+//});
+//System.Console.WriteLine(response.Message);
+
+
+//Server Streaming
+var response = messageClient.SendMessage(new MessageRequest
 {
     Message = "Merhaba",
     Name = "Samed"
 });
 
-System.Console.WriteLine(response.Message);
+CancellationTokenSource cancellationTokenSource = new();
+while (await response.ResponseStream.MoveNext(cancellationTokenSource.Token))
+{
+    System.Console.WriteLine(response.ResponseStream.Current.Message);
+}
+
+
 
 //var greeterClient = new Greeter.GreeterClient(channel);
 

@@ -15,18 +15,34 @@ var messageClient = new Message.MessageClient(channel);
 
 
 //Server Streaming
-var response = messageClient.SendMessage(new MessageRequest
-{
-    Message = "Merhaba",
-    Name = "Samed"
-});
+//var response = messageClient.SendMessage(new MessageRequest
+//{
+//    Message = "Merhaba",
+//    Name = "Samed"
+//});
 
-CancellationTokenSource cancellationTokenSource = new();
-while (await response.ResponseStream.MoveNext(cancellationTokenSource.Token))
+//CancellationTokenSource cancellationTokenSource = new();
+//while (await response.ResponseStream.MoveNext(cancellationTokenSource.Token))
+//{
+//    System.Console.WriteLine(response.ResponseStream.Current.Message);
+//}
+
+//Client Streaming
+var request = messageClient.SendMessage();
+for (int i = 0; i < 10; i++)
 {
-    System.Console.WriteLine(response.ResponseStream.Current.Message);
+    await Task.Delay(100);
+    await request.RequestStream.WriteAsync(new MessageRequest
+    {
+        Name = "Samed",
+        Message = "Merhabalar " + i
+    });
 }
 
+//Stream datanın sonlandığını ifade eder.
+await request.RequestStream.CompleteAsync();
+
+Console.WriteLine((await request.ResponseAsync).Message);
 
 
 //var greeterClient = new Greeter.GreeterClient(channel);

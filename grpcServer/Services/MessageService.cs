@@ -5,19 +5,43 @@ namespace grpcServer.Services
 {
     public class MessageService : Message.MessageBase
     {
+        //Unary
+        //public override async Task<MessageResponse> SendMessage(MessageRequest request, ServerCallContext context)
+        //{
+        //    System.Console.WriteLine($"Message: {request.Message} | Name: {request.Name}");
 
-        public override async Task SendMessage(MessageRequest request, IServerStreamWriter<MessageResponse> responseStream, ServerCallContext context)
+        //    return new MessageResponse
+        //    {
+        //        Message = "Mesaj başarıyla alınmıştır.."
+        //    };
+        //}
+
+        //Server Streaming
+        //public override async Task SendMessage(MessageRequest request, IServerStreamWriter<MessageResponse> responseStream, ServerCallContext context)
+        //{
+        //    System.Console.WriteLine($"Message: {request.Message} | Name: {request.Name}");
+
+        //    for (int i = 0; i < 10; i++)
+        //    {
+        //        await Task.Delay(200);
+        //        await responseStream.WriteAsync(new MessageResponse
+        //        {
+        //            Message = "Merhaba" + i
+        //        });
+        //    }
+        //}
+
+        public override async Task<MessageResponse> SendMessage(IAsyncStreamReader<MessageRequest> requestStream, ServerCallContext context)
         {
-            System.Console.WriteLine($"Message: {request.Message} | Name: {request.Name}");
-
-            for (int i = 0; i < 10; i++)
+            while (await requestStream.MoveNext(context.CancellationToken))
             {
-                await Task.Delay(200);
-                await responseStream.WriteAsync(new MessageResponse
-                {
-                    Message = "Merhaba" + i
-                });
+                System.Console.WriteLine($"Message: {requestStream.Current.Message} | Name: {requestStream.Current.Name}");
             }
+
+            return new MessageResponse
+            {
+                Message = "Veri alınmıştır.."
+            };
         }
     }
 }
